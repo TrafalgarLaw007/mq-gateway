@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.springframework.util.CollectionUtils;
+import pro.nbbt.healthcare.config.PropertyConfig;
 import pro.nbbt.healthcare.config.RemoteConfig;
 import pro.nbbt.healthcare.entity.HttpRequestEntity;
 import pro.nbbt.healthcare.entity.HttpResponseEntity;
@@ -77,10 +78,7 @@ public class OkHttp3Util {
         try {
             response = client.newCall(request).execute();
             assert response.body() != null;
-            // application/octet-stream
-            String contentType = response.headers().get("Content-Type");
 
-//            response.body().byteStream()
             Set<String> headerNames = response.headers().names();
             headerNames.forEach(e -> {
                 log.info("响应头 : {} - {}", e, response.header(e));
@@ -96,7 +94,6 @@ public class OkHttp3Util {
 
     public static HttpResponseEntity sendByGetUrl2(String url, Map<String, String> header) {
         HttpResponseEntity httpResponseEntity = new HttpResponseEntity();
-        String result;
         OkHttpClient client = new OkHttpClient();
 
         Request.Builder builder = new Request.Builder().url(url);
@@ -105,35 +102,25 @@ public class OkHttp3Util {
                 builder.addHeader(k, val);
             });
         }
-        Request request = builder
-                .build();
+        Request request = builder .build();
 
         Response response;
+        InputStream in = null;
         try {
             response = client.newCall(request).execute();
             assert response.body() != null;
-            // application/octet-stream
-            String contentType = response.headers().get("Content-Type");
-
-//            response.body().byteStream()
-            Set<String> headerNames = response.headers().names();
-            Map<String, String> headerMap = Maps.newHashMap();
-            headerNames.forEach(e -> {
-                log.info("响应头 : {} - {}", e, response.header(e));
-                headerMap.put(e, response.header(e));
-            });
-
-            result = response.body().string();
-
-
-            httpResponseEntity.setHeaderMap(headerMap)
-//                    .setBytes(response.body().bytes())
-//                    .setByteStream(response.body().byteStream())
-                    .setResponse(result);
-
-            return httpResponseEntity;
+            // 解析响应
+            return assembleResponse(response, httpResponseEntity);
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return null;
     }
@@ -232,16 +219,8 @@ public class OkHttp3Util {
         response = client.newCall(request).execute();
         assert response.body() != null;
 
-        Set<String> headerNames = response.headers().names();
-        Map<String, String> headerMap = Maps.newHashMap();
-        log.info("请求地址 : {}", url);
-        headerNames.forEach(e -> {
-            log.info("响应头 : {} - {}", e, response.header(e));
-            headerMap.put(e, response.header(e));
-        });
-
-        httpResponseEntity.setResponse(response.body().string()).setHeaderMap(headerMap);
-        return httpResponseEntity;
+        // 解析响应
+        return assembleResponse(response, httpResponseEntity);
     }
 
     /**
@@ -278,6 +257,80 @@ public class OkHttp3Util {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * @param url , json
+     * @return java.lang.String
+     * @author xiaobu
+     * @date 2019/3/4 11:13
+     * @descprition
+     * @version 1.0 post+json方式
+     */
+    public static HttpResponseEntity sendByPutJson2(String url, String json, Map<String, String> header) throws IOException {
+
+        HttpResponseEntity httpResponseEntity = new HttpResponseEntity();
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(30 , TimeUnit.SECONDS)
+                .writeTimeout(10 ,TimeUnit.SECONDS)
+                .readTimeout(10 ,TimeUnit.SECONDS)
+                .build();
+        RequestBody body = RequestBody.create(MEDIA_TYPE_JSON, json);
+
+        Request.Builder builder = new Request.Builder()
+                .url(url)
+                .put(body);
+
+        header.forEach((k, val) -> {
+            builder.addHeader(k, val);
+        });
+
+        Request request = builder.build();
+        Response response;
+
+        response = client.newCall(request).execute();
+        assert response.body() != null;
+
+        // 解析响应
+        return assembleResponse(response, httpResponseEntity);
+    }
+
+    /**
+     * @param url , json
+     * @return java.lang.String
+     * @author xiaobu
+     * @date 2019/3/4 11:13
+     * @descprition
+     * @version 1.0 post+json方式
+     */
+    public static HttpResponseEntity sendByDeleteJson2(String url, String json, Map<String, String> header) throws IOException {
+
+        HttpResponseEntity httpResponseEntity = new HttpResponseEntity();
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(30 , TimeUnit.SECONDS)
+                .writeTimeout(10 ,TimeUnit.SECONDS)
+                .readTimeout(10 ,TimeUnit.SECONDS)
+                .build();
+        RequestBody body = RequestBody.create(MEDIA_TYPE_JSON, json);
+
+        Request.Builder builder = new Request.Builder()
+                .url(url)
+                .delete(body);
+
+        header.forEach((k, val) -> {
+            builder.addHeader(k, val);
+        });
+
+        Request request = builder.build();
+        Response response;
+
+        response = client.newCall(request).execute();
+        assert response.body() != null;
+
+        // 解析响应
+        return assembleResponse(response, httpResponseEntity);
     }
 
     /**
@@ -332,20 +385,82 @@ public class OkHttp3Util {
         }
     }
 
+    /**
+     * 解析请求想用信息
+     * 1.响应头信息
+     * 2.响应数
+     * @param response
+     * @param httpResponseEntity
+     * @return
+     * @throws IOException
+     */
+    private static HttpResponseEntity assembleResponse(Response response, HttpResponseEntity httpResponseEntity) throws IOException {
+        Map<String, String> headerMap = assembleHeaders(response);
+        assembleBodyData(headerMap, response, httpResponseEntity);
+        httpResponseEntity.setHeaderMap(headerMap);
+        return httpResponseEntity;
+    }
+
+    /**
+     * 解析请求头
+     * @param response
+     */
+    private static Map<String, String> assembleHeaders(Response response) {
+
+        PropertyConfig properties = SpringContextHolder.getBean(PropertyConfig.class);
+
+        Set<String> headerNames = response.headers().names();
+        Map<String, String> headerMap = Maps.newHashMap();
+        headerNames.forEach(e -> {
+            if (properties.getLogDebug()) {
+                log.info("响应头 : {} - {}", e, response.header(e));
+            }
+            headerMap.put(e, response.header(e));
+        });
+
+        return headerMap;
+    }
+
+    /**
+     * 解析响应数据
+     * @param headerMap
+     * @param response
+     * @param httpResponseEntity
+     */
+    private static void assembleBodyData(Map<String, String> headerMap, Response response, HttpResponseEntity httpResponseEntity) throws IOException {
+        InputStream in = null;
+        String result = null;
+        try {
+            if (ContentTypeUtil.isFileResponse(headerMap)) {
+                in = response.body().byteStream();
+                byte[] data = new byte[Integer.valueOf(headerMap.get(ContentTypeUtil.CONTENT_LENGTH))];
+                in.read(data);
+                httpResponseEntity.setBytes(data);
+                result = null;
+            } else {
+                result = response.body().string();
+            }
+            httpResponseEntity.setHeaderMap(headerMap)
+                    .setResponse(result);
+        } finally {
+            if (in != null) {
+                in.close();
+            }
+        }
+    }
+
     @SneakyThrows
     public static String buildUrl(String url, Map<String, String[]> parameterMap) {
 
         if (CollectionUtils.isEmpty(parameterMap)) {
             return url;
         }
-
         StringBuffer sb = new StringBuffer();
         parameterMap.forEach((k, v) -> {
             for (String e : v) {
                 sb.append("&").append(k).append("=").append(e);
             }
         });
-
         return url + "?" + sb.toString().substring(1);
     }
 

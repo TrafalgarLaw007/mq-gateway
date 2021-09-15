@@ -8,10 +8,14 @@ import org.springframework.web.bind.annotation.RestController;
 import pro.nbbt.healthcare.entity.HttpRequestEntity;
 import pro.nbbt.healthcare.entity.HttpResponseEntity;
 import pro.nbbt.healthcare.rabbit.RabbitSender;
+import pro.nbbt.healthcare.utils.ContentTypeUtil;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import static pro.nbbt.healthcare.utils.ContentTypeUtil.CONTENT_TYPE;
 
 @RestController
 @Slf4j
@@ -20,16 +24,21 @@ public class ApiController {
     @Autowired
     RabbitSender rabbitSender;
 
+    /**
+     * 所有请求同一入口
+     */
     @RequestMapping(value = "/api/**", produces="application/json;charset=UTF-8")
-    public Object api(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
+    public Object api(HttpServletRequest request, HttpServletResponse response) throws Exception {
         log.info("请求地址: {}", request.getRequestURL());
         HttpResponseEntity resp = (HttpResponseEntity) rabbitSender.send(HttpRequestEntity.builderJSON(request), request, response) ;
         // 写出文件
-        if (resp != null) {
-             // response.getOutputStream().write(resp.getResponse().getBytes());
+        if (resp != null && ContentTypeUtil.isFileResponse(resp.getHeaderMap())) {
+            ServletOutputStream outputStream = response.getOutputStream();
+            outputStream.write(resp.getBytes());
+            outputStream.flush();
         }
-        response.setHeader("Content-Type", resp.getHeaderMap().get("Content-Type"));
-        log.info("响应内容 : {}", resp);
+        response.setHeader(CONTENT_TYPE, resp.getHeaderMap().get(CONTENT_TYPE));
+        log.info("响应内容 : {}", resp.getResponse());
         return resp.getResponse();
     }
 }
