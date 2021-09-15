@@ -4,11 +4,13 @@ import com.google.common.collect.Maps;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
+import okhttp3.MultipartBody.Part;
 import org.springframework.util.CollectionUtils;
 import pro.nbbt.healthcare.config.PropertyConfig;
 import pro.nbbt.healthcare.config.RemoteConfig;
 import pro.nbbt.healthcare.entity.HttpRequestEntity;
 import pro.nbbt.healthcare.entity.HttpResponseEntity;
+import pro.nbbt.healthcare.entity.MultipartFileEntity;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,7 +29,7 @@ public class OkHttp3Util {
     //MEDIA_TYPE_TEXT post请求不是application/x-www-form-urlencoded的，全部直接返回，不作处理，即不会解析表单数据来放到request parameter map中。所以通过request.getParameter(name)是获取不到的。只能使用最原始的方式，读取输入流来获取。
     private static final MediaType MEDIA_TYPE_TEXT = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
     //
-    private static final MediaType MEDIA_TYPE_MULTIPART = MediaType.parse("multipar/form-data;");
+    private static final MediaType MEDIA_TYPE_MULTIPART = MediaType.parse("multipart/form-data;");
 
     /**
      * @param url getUrl
@@ -225,7 +227,16 @@ public class OkHttp3Util {
         return assembleResponse(response, httpResponseEntity);
     }
 
-    public static HttpResponseEntity sendByPostMultipart2(String url, String json, Map<String, String> header) throws IOException {
+    /**
+     * @param url , json
+     * @param multiFileMap
+     * @return java.lang.String
+     * @author xiaobu
+     * @date 2019/3/4 11:13
+     * @descprition
+     * @version 1.0 post+multipart/form-data方式
+     */
+    public static HttpResponseEntity sendByPostMultipart2(String url, String json, Map<String, String> header, Map<String, MultipartFileEntity> multiFileMap) throws IOException {
 
         HttpResponseEntity httpResponseEntity = new HttpResponseEntity();
 
@@ -234,17 +245,29 @@ public class OkHttp3Util {
                 .writeTimeout(10 ,TimeUnit.SECONDS)
                 .readTimeout(10 ,TimeUnit.SECONDS)
                 .build();
-        RequestBody body = RequestBody.create(MEDIA_TYPE_MULTIPART, json);
 
-        Request.Builder builder = new Request.Builder()
-                .url(url)
-                .post(body);
+        MultipartBody.Builder builder = new MultipartBody.Builder();
+        builder.setType(MEDIA_TYPE_MULTIPART);
 
-        header.forEach((k, val) -> {
-            builder.addHeader(k, val);
+        multiFileMap.forEach((k, v) -> {
+            builder.addFormDataPart(k, v.getName(), RequestBody.create(MEDIA_TYPE_MULTIPART, v.getBytes()));
         });
 
-        Request request = builder.build();
+        /*Headers headers = Headers.of(header);
+        RequestBody body = RequestBody.create(MEDIA_TYPE_MULTIPART, json);
+        builder.addPart(headers, body);*/
+
+       /* RequestBody body = RequestBody.create(MEDIA_TYPE_MULTIPART, json);*/
+
+        MultipartBody body = builder.build();
+        Headers headers = Headers.of(header);
+
+        Request.Builder requestBuilder = new Request.Builder()
+                .url(url)
+                .headers(headers)
+                .post(body);
+
+        Request request = requestBuilder.build();
         Response response;
 
         response = client.newCall(request).execute();

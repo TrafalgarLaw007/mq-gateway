@@ -32,43 +32,43 @@ public class HttpRequestEntity implements Serializable {
     /**
      * 请求地址
      */
-    public String requestUrl;
+    private String requestUrl;
     /**
      * 请求地址
      */
-    public String requestUri;
+    private String requestUri;
     /**
      * 请求类型
      */
-    public String method;
+    private String method;
     /**
      * Cookie
      */
-    public Cookie[] cookies;
+    private Cookie[] cookies;
     /**
      * 请求头名称
      */
-//    public Enumeration<String> headerNames;
+//    private Enumeration<String> headerNames;
     /**
      * 请求头键值对
      */
-    public Map<String, String> headerMap;
+    private Map<String, String> headerMap;
     /**
      * 请求参数
      */
-    public Map<String, String[]> parameterMap;
+    private Map<String, String[]> parameterMap;
     /**
      * body数据
      */
-    public String bodyData;
+    private String bodyData;
     /**
      * Session ID
      */
-    public String sessionId;
+    private String sessionId;
     /**
      * 文件上传
      */
-    public byte[] data;
+    private byte[] data;
 
     /**
      * 多媒体

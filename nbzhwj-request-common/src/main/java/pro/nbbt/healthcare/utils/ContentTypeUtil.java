@@ -3,9 +3,11 @@ package pro.nbbt.healthcare.utils;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import pro.nbbt.healthcare.constants.ContentTypeConstant;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static pro.nbbt.healthcare.constants.ContentTypeConstant.*;
 
@@ -54,6 +56,18 @@ public final class ContentTypeUtil {
         if (headerMap == null || headerMap.size() == 0) {
             return false;
         }
-        return isFileResponse(headerMap.get(CONTENT_TYPE));
+        return isFileResponse(headerMap.get(CONTENT_TYPE)) || isFileResponse(headerMap.get(CONTENT_TYPE.toLowerCase())) ;
+    }
+
+    /**
+     * 判断响应是否为文件
+     * @param headerMap
+     * @return
+     */
+    public static boolean isMultipartFormData(Map<String, String> headerMap) {
+        if (headerMap == null || headerMap.size() == 0) {
+            return false;
+        }
+        return Optional.ofNullable(headerMap.get(CONTENT_TYPE)).orElse(headerMap.get(CONTENT_TYPE.toLowerCase())).contains(MULTIPART_FORM_DATA);
     }
 }
