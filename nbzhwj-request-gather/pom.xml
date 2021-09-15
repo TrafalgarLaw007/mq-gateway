@@ -12,7 +12,6 @@
   <artifactId>nbzhwj-request-gather</artifactId>
 
   <name>nbzhwj-request-gather</name>
-  <url>http://www.example.com</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -61,6 +60,11 @@
       <groupId>com.alibaba</groupId>
       <artifactId>fastjson</artifactId>
       <version>1.2.78</version>
+    </dependency>
+    <dependency>
+      <groupId>pro.nbbt.healthcare</groupId>
+      <artifactId>nbzhwj-request-common</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>

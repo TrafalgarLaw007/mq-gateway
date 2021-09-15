@@ -26,6 +26,8 @@ public class OkHttp3Util {
     private static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
     //MEDIA_TYPE_TEXT post请求不是application/x-www-form-urlencoded的，全部直接返回，不作处理，即不会解析表单数据来放到request parameter map中。所以通过request.getParameter(name)是获取不到的。只能使用最原始的方式，读取输入流来获取。
     private static final MediaType MEDIA_TYPE_TEXT = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
+    //
+    private static final MediaType MEDIA_TYPE_MULTIPART = MediaType.parse("multipar/form-data;");
 
     /**
      * @param url getUrl
@@ -204,6 +206,35 @@ public class OkHttp3Util {
                 .readTimeout(10 ,TimeUnit.SECONDS)
                 .build();
         RequestBody body = RequestBody.create(MEDIA_TYPE_JSON, json);
+
+        Request.Builder builder = new Request.Builder()
+                .url(url)
+                .post(body);
+
+        header.forEach((k, val) -> {
+            builder.addHeader(k, val);
+        });
+
+        Request request = builder.build();
+        Response response;
+
+        response = client.newCall(request).execute();
+        assert response.body() != null;
+
+        // 解析响应
+        return assembleResponse(response, httpResponseEntity);
+    }
+
+    public static HttpResponseEntity sendByPostMultipart2(String url, String json, Map<String, String> header) throws IOException {
+
+        HttpResponseEntity httpResponseEntity = new HttpResponseEntity();
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(30 , TimeUnit.SECONDS)
+                .writeTimeout(10 ,TimeUnit.SECONDS)
+                .readTimeout(10 ,TimeUnit.SECONDS)
+                .build();
+        RequestBody body = RequestBody.create(MEDIA_TYPE_MULTIPART, json);
 
         Request.Builder builder = new Request.Builder()
                 .url(url)

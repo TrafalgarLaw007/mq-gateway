@@ -28,12 +28,12 @@ public final class ContentTypeUtil {
     public static boolean isFileResponse(String contentType) {
         boolean ret = false;
         if (!StringUtils.hasLength(contentType)) {
-            return ret;
+            return false;
         }
 
         ret = IO_TYPES.contains(contentType) || (contentType.contains(";") && IO_TYPES.contains(contentType.substring(0, contentType.indexOf(";"))));
         if (ret) {
-            return ret;
+            return true;
         }
 
         for (String ct : IO_TYPES) {

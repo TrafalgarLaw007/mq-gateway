@@ -5,6 +5,13 @@ import com.google.common.collect.Maps;
 import lombok.Data;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
+import pro.nbbt.healthcare.common.ContentTypeConstant;
+import pro.nbbt.healthcare.common.MethodType;
+import pro.nbbt.healthcare.utils.ContentTypeUtil;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +24,7 @@ import java.util.Map;
 @Data
 @Accessors(chain = true)
 @ToString
+@Slf4j
 public class HttpRequestEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -57,6 +65,16 @@ public class HttpRequestEntity implements Serializable {
      * Session ID
      */
     public String sessionId;
+    /**
+     * 文件上传
+     */
+    public byte[] data;
+
+    /**
+     * 多媒体
+     */
+//    MultiValueMap<String, MultipartFile> multiFileMap;
+    Map<String, MultipartFileEntity> multiFileMap;
 
     /**
      * 构建Http请求实体JSON字符串
@@ -82,8 +100,15 @@ public class HttpRequestEntity implements Serializable {
         assembleCookies(request, httpRequestEntity);
         assembleHeaders(request, httpRequestEntity);
         assembleParameterMap(request, httpRequestEntity);
-        assembleBodyData(request, httpRequestEntity);
-        // TODO 文件上传
+        if (!MethodType.GET.equalsIgnoreCase(httpRequestEntity.getMethod())) {
+            assembleBodyData(request, httpRequestEntity);
+            if (httpRequestEntity.getHeaderMap().containsKey(ContentTypeUtil.CONTENT_TYPE.toLowerCase())
+                    && httpRequestEntity.getHeaderMap().get(ContentTypeUtil.CONTENT_TYPE.toLowerCase()).contains(ContentTypeConstant.MULTIPART_FORM_DATA)) {
+                // 文件上传
+                assembleMultipartFile(request, httpRequestEntity);
+            }
+        }
+
         // TODO WebService支持
         return httpRequestEntity;
     }
@@ -122,6 +147,10 @@ public class HttpRequestEntity implements Serializable {
      */
     private static void assembleParameterMap(HttpServletRequest request, HttpRequestEntity httpRequestEntity) {
         httpRequestEntity.setParameterMap(request.getParameterMap());
+
+        httpRequestEntity.getParameterMap().forEach((k, v) -> {
+            log.info("请求参数 : {} - {}", k, v);
+        });
     }
 
     /**
@@ -132,12 +161,48 @@ public class HttpRequestEntity implements Serializable {
     private static void assembleBodyData(HttpServletRequest request, HttpRequestEntity httpRequestEntity) {
         try {
             String bodyData = getPostData(request);
+            log.info("请求体内容 : {}", bodyData);
             httpRequestEntity.setBodyData(bodyData);
         } catch (Exception e) {
-
+            log.info("获取请求体内容异常 ： {}", e);
         }
     }
 
+    /**
+     * 设置上传文件数据
+     * @param request
+     * @param httpRequestEntity
+     */
+    private static void assembleMultipartFile(HttpServletRequest request, HttpRequestEntity httpRequestEntity) {
+        MultiValueMap<String, MultipartFile> multiFileMap = ((StandardMultipartHttpServletRequest) request).getMultiFileMap();
+        Map<String, MultipartFileEntity> multiFileMapData = Maps.newHashMap();
+        multiFileMap.forEach((k, v) -> {
+            log.info("多媒体 -> {} - {}", k, v.get(0).getOriginalFilename());
+            multiFileMapData.put(k, assembleMultipartFileEntity(v.get(0)));
+        });
+        httpRequestEntity.setMultiFileMap(multiFileMapData);
+    }
+
+    private static MultipartFileEntity assembleMultipartFileEntity(MultipartFile multipartFile) {
+        MultipartFileEntity multipartFileEntity = new MultipartFileEntity();
+
+        try {
+            multipartFileEntity.setBytes(multipartFile.getBytes())
+                    .setContentType(multipartFile.getContentType())
+                    .setOriginalFilename(multipartFile.getOriginalFilename())
+                    .setName(multipartFile.getName())
+                    .setSize(multipartFile.getSize());
+        } catch (Exception e) {
+            log.warn("媒体文件解析失败: {}", e.getMessage());
+        }
+        return multipartFileEntity;
+    }
+
+    /**
+     * 获取请求体参数
+     * @param request
+     * @return
+     */
     private static String getPostData(HttpServletRequest request) {
         StringBuffer data = new StringBuffer();
         String line = null;
@@ -151,4 +216,6 @@ public class HttpRequestEntity implements Serializable {
         }
         return data.toString();
     }
+
+
 }

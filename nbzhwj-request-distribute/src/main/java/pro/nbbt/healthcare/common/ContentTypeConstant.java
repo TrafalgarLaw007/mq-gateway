@@ -42,6 +42,10 @@ public final class ContentTypeConstant {
      */
     public static final String APPLICATION_ATOM_XML = "application/atom-xml";
     /**
+     * json格式
+     */
+    public static final String APPLICATION_JSON = "application/json";
+    /**
      * pdf聚合格式
      */
     public static final String APPLICATION_PDF = "application/pdf";

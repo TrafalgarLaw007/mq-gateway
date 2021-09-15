@@ -58,7 +58,7 @@ public final class ContentTypeConstant {
      */
     public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
     /**
-     * 每天格式
+     * 媒体格式
      */
     public static final String MULTIPART_FORM_DATA = "multipart/form-data";
 }
