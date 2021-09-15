@@ -9,8 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
-import pro.nbbt.healthcare.common.ContentTypeConstant;
-import pro.nbbt.healthcare.common.MethodType;
+import pro.nbbt.healthcare.constants.ContentTypeConstant;
+import pro.nbbt.healthcare.constants.MethodType;
 import pro.nbbt.healthcare.utils.ContentTypeUtil;
 
 import javax.servlet.http.Cookie;

@@ -6,6 +6,7 @@
     <modules>
         <module>nbzhwj-request-gather</module>
         <module>nbzhwj-request-distribute</module>
+        <module>nbzhwj-request-common</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -28,6 +29,12 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-amqp</artifactId>
             </dependency>-->
+            <dependency>
+                <groupId>nbzhwj-data-service</groupId>
+                <artifactId>nbzhwj-request-common</artifactId>
+                <version>0.0.1</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

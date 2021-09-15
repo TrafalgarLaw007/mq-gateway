@@ -1,4 +1,4 @@
-package pro.nbbt.healthcare.common;
+package pro.nbbt.healthcare.constants;
 
 /**
  * ContentType

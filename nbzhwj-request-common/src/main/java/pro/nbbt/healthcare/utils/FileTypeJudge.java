@@ -1,6 +1,7 @@
 package pro.nbbt.healthcare.utils;
 
-import pro.nbbt.healthcare.common.FileType;
+
+import pro.nbbt.healthcare.constants.FileType;
 
 import java.io.IOException;
 import java.io.InputStream;

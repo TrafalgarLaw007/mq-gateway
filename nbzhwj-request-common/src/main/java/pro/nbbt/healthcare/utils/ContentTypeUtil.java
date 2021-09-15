@@ -1,13 +1,13 @@
 package pro.nbbt.healthcare.utils;
 
 import com.google.common.collect.Lists;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
 
-import static pro.nbbt.healthcare.common.ContentTypeConstant.*;
+import static pro.nbbt.healthcare.constants.ContentTypeConstant.*;
 
 public final class ContentTypeUtil {
 
@@ -27,7 +27,7 @@ public final class ContentTypeUtil {
      */
     public static boolean isFileResponse(String contentType) {
         boolean ret = false;
-        if (!StringUtils.hasLength(contentType)) {
+        if (StringUtils.isBlank(contentType)) {
             return false;
         }
 
@@ -51,7 +51,7 @@ public final class ContentTypeUtil {
      * @return
      */
     public static boolean isFileResponse(Map<String, String> headerMap) {
-        if (CollectionUtils.isEmpty(headerMap)) {
+        if (headerMap == null || headerMap.size() == 0) {
             return false;
         }
         return isFileResponse(headerMap.get(CONTENT_TYPE));

@@ -7,15 +7,14 @@ import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import pro.nbbt.healthcare.common.ContentTypeConstant;
-import pro.nbbt.healthcare.common.MethodType;
 import pro.nbbt.healthcare.config.PropertyConfig;
+import pro.nbbt.healthcare.constants.ContentTypeConstant;
+import pro.nbbt.healthcare.constants.MethodType;
 import pro.nbbt.healthcare.entity.HttpRequestEntity;
 import pro.nbbt.healthcare.entity.HttpResponseEntity;
 import pro.nbbt.healthcare.utils.ContentTypeUtil;
 import pro.nbbt.healthcare.utils.OkHttp3Util;
 
-import java.io.IOException;
 import java.util.Map;
 
 @Component
