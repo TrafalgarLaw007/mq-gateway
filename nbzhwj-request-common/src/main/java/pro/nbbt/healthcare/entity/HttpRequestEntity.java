@@ -65,10 +65,6 @@ public class HttpRequestEntity implements Serializable {
      * Session ID
      */
     private String sessionId;
-    /**
-     * 文件上传
-     */
-    private byte[] data;
 
     /**
      * 多媒体
@@ -108,8 +104,6 @@ public class HttpRequestEntity implements Serializable {
                 assembleMultipartFile(request, httpRequestEntity);
             }
         }
-
-        // TODO WebService支持
         return httpRequestEntity;
     }
 

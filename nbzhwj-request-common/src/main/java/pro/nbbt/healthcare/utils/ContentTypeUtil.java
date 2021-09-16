@@ -15,6 +15,7 @@ public final class ContentTypeUtil {
 
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String CUSTOM_HEADER_WEB_SERVICE = "Web-Service";
 
     private static final List<String> IO_TYPES;
 
@@ -60,7 +61,7 @@ public final class ContentTypeUtil {
     }
 
     /**
-     * 判断响应是否为文件
+     * 判断请求是否为文件
      * @param headerMap
      * @return
      */
@@ -69,5 +70,17 @@ public final class ContentTypeUtil {
             return false;
         }
         return Optional.ofNullable(headerMap.get(CONTENT_TYPE)).orElse(headerMap.get(CONTENT_TYPE.toLowerCase())).contains(MULTIPART_FORM_DATA);
+    }
+
+    /**
+     * 判断请求是否为文件
+     * @param headerMap
+     * @return
+     */
+    public static boolean isWebService(Map<String, String> headerMap) {
+        if (headerMap == null || headerMap.size() == 0) {
+            return false;
+        }
+        return headerMap.get(CONTENT_TYPE).contains(APPLICATION_XML) && headerMap.containsKey(CUSTOM_HEADER_WEB_SERVICE);
     }
 }

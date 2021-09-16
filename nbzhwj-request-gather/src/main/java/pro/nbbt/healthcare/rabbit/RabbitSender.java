@@ -60,27 +60,21 @@ public class RabbitSender {
     }*/
 
     public Object send(Object message, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        /*MessageHeaders messageHeaders = new MessageHeaders(properties);
-        Message<Object> msg = MessageBuilder.createMessage(message, messageHeaders);
-        rabbitTemplate.setConfirmCallback(confirmCallback);
-        // 指定业务唯一的ID
-        CorrelationData correlationData = new CorrelationData(UUID.randomUUID().toString());
-        MessagePostProcessor messagePostProcessor = new MessagePostProcessor() {
-            @Override
-            public org.springframework.amqp.core.Message postProcessMessage(org.springframework.amqp.core.Message message) throws AmqpException {
-                log.info("---> Post to do : " + message);
-                return message;
-            }
-        };
 
-        rabbitTemplate.convertAndSend("request-gather", "request.gather.rabbit", msg, messagePostProcessor, correlationData);*/
-
-//        rabbitTemplate.setConfirmCallback(confirmCallback);
         // 指定业务唯一的ID
         CorrelationData correlationData = new CorrelationData(UUID.randomUUID().toString());
 
         // RPC调用
 //        rabbitTemplate.convertSendAndReceive("RequestExchange", "Req-Resp", message, correlationData);
+        Object resp = rabbitTemplate.convertSendAndReceive("RequestExchange", "Req-Resp", message, correlationData);
+        return resp;
+    }
+
+    public Object send(Object message) {
+        // 指定业务唯一的ID
+        CorrelationData correlationData = new CorrelationData(UUID.randomUUID().toString());
+
+        // RPC调用
         Object resp = rabbitTemplate.convertSendAndReceive("RequestExchange", "Req-Resp", message, correlationData);
         return resp;
     }

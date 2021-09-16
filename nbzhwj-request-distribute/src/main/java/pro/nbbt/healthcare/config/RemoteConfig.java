@@ -16,10 +16,18 @@ public class RemoteConfig {
 
     private Integer port;
 
+    private String webServiceHost;
+
+    private Integer webServicePort;
+
     public String getRequestUrl() {
         if (StringUtils.hasLength(url)) {
             return url;
         }
         return "http://" + host + ":" + port;
+    }
+
+    public String getWebServiceRequestUrl() {
+        return "http://" + webServiceHost + ":" + webServicePort;
     }
 }

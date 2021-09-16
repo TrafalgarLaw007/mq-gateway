@@ -50,7 +50,9 @@ public class RequestDistributeReceiver {
                     break;
                 case MethodType.POST:
                     // 区分请求类型
-                    if (!ContentTypeUtil.isMultipartFormData(httpRequestEntity.getHeaderMap())) {
+                    if (ContentTypeUtil.isWebService(httpRequestEntity.getHeaderMap())) {
+                        resp = OkHttp3Util.sendByPostXml2(OkHttp3Util.getWebServiceUrl(httpRequestEntity), httpRequestEntity.getBodyData(), headerMap);
+                    } else if (!ContentTypeUtil.isMultipartFormData(httpRequestEntity.getHeaderMap())) {
                         resp = OkHttp3Util.sendByPostJson2(OkHttp3Util.getEncodeRequestUrl(httpRequestEntity), httpRequestEntity.getBodyData(), headerMap);
                     } else {
                         Map<String, MultipartFileEntity> multiFileMap = httpRequestEntity.getMultiFileMap();

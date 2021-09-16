@@ -12,3 +12,10 @@ spring:
   servlet:
     multipart:
       max-file-size: 200
+
+web:
+  service:
+    url: http://%s:%s/wj/waterserver
+    publishIp: 0.0.0.0
+    publishPort: 9990
+    zyws_url: http://%s:%s/wj/zywsSever

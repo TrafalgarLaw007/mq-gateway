@@ -6,6 +6,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import pro.nbbt.healthcare.rabbit.RabbitSender;
+import pro.nbbt.healthcare.webservice.impl.WaterWebServiceImpl;
+import pro.nbbt.healthcare.webservice.impl.ZYWSMoniterWebServiceImpl;
 
 /**
  * Hello world!
@@ -22,6 +24,11 @@ public class RequestGatherApplication implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+
+        // 发布数据接口服务
+        WaterWebServiceImpl.publishWebService();
+        ZYWSMoniterWebServiceImpl.publishWebService();
+
         new Thread(() -> {
             try {
                 while (1 == 1) {

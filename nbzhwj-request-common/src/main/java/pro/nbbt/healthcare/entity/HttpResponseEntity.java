@@ -20,4 +20,8 @@ public class HttpResponseEntity implements Serializable {
     public byte bytes[];
 
     public String response;
+
+    public static HttpResponseEntity newHttpResponseEntity() {
+        return new HttpResponseEntity();
+    }
 }

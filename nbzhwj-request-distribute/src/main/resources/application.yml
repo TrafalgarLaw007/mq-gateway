@@ -10,6 +10,7 @@ spring:
 remote:
   host: ${REMOTE-HOST:192.168.0.197}
   port: ${REMOTE-PORT:9996}
-
+  webServiceHost: ${WS-HOST:192.168.0.197}
+  webServicePort: ${WS-PORT:9990}
 data:
   logdebug: true

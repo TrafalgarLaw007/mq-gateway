@@ -39,4 +39,29 @@ public class ApiController {
         log.info("响应内容 : {}", resp.getResponse());
         return resp.getResponse();
     }
+
+    @RequestMapping(value = "/wj/**")
+    public Object webservice(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("请求地址: {}", request.getRequestURL());
+
+        return request.getRequestURL();
+    }
+
+    /**
+     * 所有请求同一入口
+     */
+    /*@RequestMapping(value = "/wj/**", produces="application/json;charset=UTF-8")
+    public Object webservice(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("请求地址: {}", request.getRequestURL());
+        HttpResponseEntity resp = (HttpResponseEntity) rabbitSender.send(HttpRequestEntity.builderJSON(request), request, response) ;
+        // 写出文件
+        if (resp != null && ContentTypeUtil.isFileResponse(resp.getHeaderMap())) {
+            ServletOutputStream outputStream = response.getOutputStream();
+            outputStream.write(resp.getBytes());
+            outputStream.flush();
+        }
+        response.setHeader(CONTENT_TYPE, resp.getHeaderMap().get(CONTENT_TYPE));
+        log.info("响应内容 : {}", resp.getResponse());
+        return resp.getResponse();
+    }*/
 }

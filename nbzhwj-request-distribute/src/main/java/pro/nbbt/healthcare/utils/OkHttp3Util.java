@@ -4,10 +4,11 @@ import com.google.common.collect.Maps;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
-import okhttp3.MultipartBody.Part;
 import org.springframework.util.CollectionUtils;
 import pro.nbbt.healthcare.config.PropertyConfig;
 import pro.nbbt.healthcare.config.RemoteConfig;
+import pro.nbbt.healthcare.constants.ContentTypeConstant;
+import pro.nbbt.healthcare.constants.MethodType;
 import pro.nbbt.healthcare.entity.HttpRequestEntity;
 import pro.nbbt.healthcare.entity.HttpResponseEntity;
 import pro.nbbt.healthcare.entity.MultipartFileEntity;
@@ -29,7 +30,12 @@ public class OkHttp3Util {
     //MEDIA_TYPE_TEXT post请求不是application/x-www-form-urlencoded的，全部直接返回，不作处理，即不会解析表单数据来放到request parameter map中。所以通过request.getParameter(name)是获取不到的。只能使用最原始的方式，读取输入流来获取。
     private static final MediaType MEDIA_TYPE_TEXT = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
     //
-    private static final MediaType MEDIA_TYPE_MULTIPART = MediaType.parse("multipart/form-data;");
+    private static final MediaType MEDIA_TYPE_MULTIPART = MediaType.parse("multipart/form-data");
+    private static final MediaType MEDIA_TYPE_TEXT_XML = MediaType.parse("text/xml");
+    private static final MediaType MEDIA_TYPE_APPLICATION_XML = MediaType.parse("application/xml");
+
+    private static final String WEB_SERVICE_RETURN_PREFIX = "<return>";
+    private static final String WEB_SERVICE_RETURN_SUFFIX = "</return>";
 
     /**
      * @param url getUrl
@@ -278,6 +284,46 @@ public class OkHttp3Util {
     }
 
     /**
+     * @param url , json
+     * @return java.lang.String
+     * @author xiaobu
+     * @date 2019/3/4 11:13
+     * @descprition
+     * @version 1.0 post+json方式
+     */
+    public static HttpResponseEntity sendByPostXml2(String url, String xml, Map<String, String> header) throws IOException {
+
+        HttpResponseEntity httpResponseEntity = HttpResponseEntity.newHttpResponseEntity();
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(30 , TimeUnit.SECONDS)
+                .writeTimeout(10 ,TimeUnit.SECONDS)
+                .readTimeout(10 ,TimeUnit.SECONDS)
+                .build();
+        RequestBody body = RequestBody.create(MEDIA_TYPE_APPLICATION_XML, xml);
+
+//        log.info("请求内容 : {}" , xml);
+        Request.Builder builder = new Request.Builder()
+                .url(url)
+                .method(MethodType.POST, body)
+                .addHeader(ContentTypeUtil.CONTENT_TYPE, ContentTypeConstant.APPLICATION_XML);
+
+        Request request = builder.build();
+        Response response;
+
+        response = client.newCall(request).execute();
+        assert response.body() != null;
+
+
+        // 解析响应
+        assembleResponse(response, httpResponseEntity);
+        // WebService需要解析<return></return>之间的内容
+        String responseStr = httpResponseEntity.getResponse();
+        httpResponseEntity.setResponse(responseStr.substring(responseStr.indexOf("<return>") + 8, responseStr.indexOf("</return>")));
+        return httpResponseEntity;
+    }
+
+    /**
      * @author xiaobu
      * @date 2019/3/4 15:58
      * @param url , params]
@@ -323,7 +369,7 @@ public class OkHttp3Util {
      */
     public static HttpResponseEntity sendByPutJson2(String url, String json, Map<String, String> header) throws IOException {
 
-        HttpResponseEntity httpResponseEntity = new HttpResponseEntity();
+        HttpResponseEntity httpResponseEntity = HttpResponseEntity.newHttpResponseEntity();
 
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(30 , TimeUnit.SECONDS)
@@ -360,7 +406,7 @@ public class OkHttp3Util {
      */
     public static HttpResponseEntity sendByDeleteJson2(String url, String json, Map<String, String> header) throws IOException {
 
-        HttpResponseEntity httpResponseEntity = new HttpResponseEntity();
+        HttpResponseEntity httpResponseEntity = HttpResponseEntity.newHttpResponseEntity();
 
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(30 , TimeUnit.SECONDS)
@@ -521,5 +567,62 @@ public class OkHttp3Util {
     public static String getEncodeRequestUrl(HttpRequestEntity httpRequestEntity) {
         RemoteConfig remoteConfig = SpringContextHolder.getBean(RemoteConfig.class);
         return OkHttp3Util.buildUrl(remoteConfig.getRequestUrl() + httpRequestEntity.getRequestUri(), httpRequestEntity.getParameterMap());
+    }
+
+    public static String getWebServiceUrl(HttpRequestEntity httpRequestEntity) {
+        RemoteConfig remoteConfig = SpringContextHolder.getBean(RemoteConfig.class);
+        return remoteConfig.getWebServiceRequestUrl() + httpRequestEntity.getRequestUri() + "?wsdl";
+    }
+
+    public static void main(String[] args) throws IOException {
+
+
+        /*OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+//        MediaType mediaType = MediaType.parse("application/xml");
+        RequestBody body = RequestBody.create(MEDIA_TYPE_APPLICATION_XML, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://service.server.huntto.com/\">\r\n   <soapenv:Header/>\r\n   <soapenv:Body>\r\n      <ser:sendValues>\r\n         <!--Optional:-->\r\n         <arg0>\r\n\r\n         \t<![CDATA[\r\n         <models>\r\n\t\t    <TestDataModel>\r\n\t\t        <TestID>197899</TestID>\r\n\t\t        <SiteID>fd7a0e51-e8ad-438d-84e6-f053009d6761</SiteID>\r\n\t\t        <ParameterID>12</ParameterID>\r\n\t\t        <TestValue>72.3000</TestValue>\r\n\t\t        <CreateDate>2021/08/31 21:37:06</CreateDate>\r\n\t\t        <CreateUser>BG_12080388872</CreateUser>\r\n\t\t        <LastChangeDate></LastChangeDate>\r\n\t\t        <LastChangeUser></LastChangeUser>\r\n\t\t        <State>1</State>\r\n\t\t        <TriggerValue></TriggerValue>\r\n\t\t        <Ext2></Ext2>\r\n\t\t        <Ext3></Ext3>\r\n\t\t</TestDataModel>\r\n\t\t<TestDataModel>\r\n\t\t        <TestID>197899</TestID>\r\n\t\t        <SiteID>fd7a0e51-e8ad-438d-84e6-f053009d6761</SiteID>\r\n\t\t        <ParameterID>13</ParameterID>\r\n\t\t        <TestValue>72.3000</TestValue>\r\n\t\t        <CreateDate>2021/08/31 21:37:06</CreateDate>\r\n\t\t        <CreateUser>BG_12080388872</CreateUser>\r\n\t\t        <LastChangeDate></LastChangeDate>\r\n\t\t        <LastChangeUser></LastChangeUser>\r\n\t\t        <State>1</State>\r\n\t\t        <TriggerValue></TriggerValue>\r\n\t\t        <Ext2></Ext2>\r\n\t\t        <Ext3></Ext3>\r\n\t\t</TestDataModel>\r\n\t\t<TestDataModel>\r\n\t\t        <TestID>197899</TestID>\r\n\t\t        <SiteID>fd7a0e51-e8ad-438d-84e6-f053009d6761</SiteID>\r\n\t\t        <ParameterID>14</ParameterID>\r\n\t\t        <TestValue>72.3000</TestValue>\r\n\t\t        <CreateDate>2021/08/31 21:37:06</CreateDate>\r\n\t\t        <CreateUser>BG_12080388872</CreateUser>\r\n\t\t        <LastChangeDate></LastChangeDate>\r\n\t\t        <LastChangeUser></LastChangeUser>\r\n\t\t        <State>1</State>\r\n\t\t        <TriggerValue></TriggerValue>\r\n\t\t        <Ext2></Ext2>\r\n\t\t        <Ext3></Ext3>\r\n\t\t</TestDataModel>\r\n\t\t</models>\r\n         \t]]>\r\n         </arg0>\r\n      </ser:sendValues>\r\n   </soapenv:Body>\r\n</soapenv:Envelope>");
+        Request request = new Request.Builder()
+                .url("http://192.168.0.197:9990/wj/waterserver?wsdl")
+                .method(MethodType.POST, body)
+//                .addHeader("Authorization", "Basic d2F0ZXJfbW9uaXRvcjp3YXRlcl9tb25pdG9y")
+                .addHeader("Content-Type", "application/xml")
+                .build();
+        Response response = client.newCall(request).execute();
+        System.out.println(response.body().string());*/
+
+       /* String s = "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"><soap:Body><ns2:sendValuesResponse xmlns:ns2=\"http://service.server.huntto.com/\"><return>0</return></ns2:sendValuesResponse></soap:Body></soap:Envelope>";
+
+
+        String s1 = s.substring(s.indexOf("<return>") + 8, s.indexOf("</return>"));
+        System.out.println(s1);*/
+
+        // --->
+        /*HttpResponseEntity httpResponseEntity = HttpResponseEntity.newHttpResponseEntity();
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(30 , TimeUnit.SECONDS)
+                .writeTimeout(10 ,TimeUnit.SECONDS)
+                .readTimeout(10 ,TimeUnit.SECONDS)
+                .build();
+        RequestBody body = RequestBody.create(MEDIA_TYPE_APPLICATION_XML, xml);
+
+        Request.Builder builder = new Request.Builder()
+                .url(url)
+                .method(MethodType.POST, body);
+
+        header.forEach((k, val) -> {
+            builder.addHeader(k, val);
+        });
+
+        Request request = builder.build();
+        Response response;
+
+        response = client.newCall(request).execute();
+        assert response.body() != null;
+
+
+        // 解析响应
+        return assembleResponse(response, httpResponseEntity);*/
+
     }
 }
