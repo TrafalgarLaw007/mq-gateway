@@ -46,10 +46,6 @@ public class HttpRequestEntity implements Serializable {
      */
     private Cookie[] cookies;
     /**
-     * 请求头名称
-     */
-//    private Enumeration<String> headerNames;
-    /**
      * 请求头键值对
      */
     private Map<String, String> headerMap;

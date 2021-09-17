@@ -40,12 +40,12 @@ public class ApiController {
         return resp.getResponse();
     }
 
-    @RequestMapping(value = "/wj/**")
+    /*@RequestMapping(value = "/wj/**")
     public Object webservice(HttpServletRequest request, HttpServletResponse response) throws Exception {
         log.info("请求地址: {}", request.getRequestURL());
 
         return request.getRequestURL();
-    }
+    }*/
 
     /**
      * 所有请求同一入口
