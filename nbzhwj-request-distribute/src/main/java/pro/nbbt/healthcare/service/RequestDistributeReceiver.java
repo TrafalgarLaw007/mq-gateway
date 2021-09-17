@@ -46,26 +46,26 @@ public class RequestDistributeReceiver {
             Map<String, String> headerMap = httpRequestEntity.getHeaderMap();
             switch (httpRequestEntity.getMethod()) {
                 case MethodType.GET:
-                    resp = OkHttp3Util.sendByGetUrl2(OkHttp3Util.getEncodeRequestUrl(httpRequestEntity), headerMap);
+                    resp = OkHttp3Util.sendByGetUrl(OkHttp3Util.getEncodeRequestUrl(httpRequestEntity), headerMap);
                     break;
                 case MethodType.POST:
                     // 区分请求类型
                     if (ContentTypeUtil.isWebService(httpRequestEntity.getHeaderMap())) {
-                        resp = OkHttp3Util.sendByPostXml2(OkHttp3Util.getWebServiceUrl(httpRequestEntity), httpRequestEntity.getBodyData(), headerMap);
+                        resp = OkHttp3Util.sendByPostXml(OkHttp3Util.getWebServiceUrl(httpRequestEntity), httpRequestEntity.getBodyData(), headerMap);
                     } else if (!ContentTypeUtil.isMultipartFormData(httpRequestEntity.getHeaderMap())) {
-                        resp = OkHttp3Util.sendByPostJson2(OkHttp3Util.getEncodeRequestUrl(httpRequestEntity), httpRequestEntity.getBodyData(), headerMap);
+                        resp = OkHttp3Util.sendByPostJson(OkHttp3Util.getEncodeRequestUrl(httpRequestEntity), httpRequestEntity.getBodyData(), headerMap);
                     } else {
                         Map<String, MultipartFileEntity> multiFileMap = httpRequestEntity.getMultiFileMap();
-                        resp = OkHttp3Util.sendByPostMultipart2(OkHttp3Util.getEncodeRequestUrl(httpRequestEntity), httpRequestEntity.getBodyData(), headerMap, multiFileMap);
+                        resp = OkHttp3Util.sendByPostMultipart(OkHttp3Util.getEncodeRequestUrl(httpRequestEntity), httpRequestEntity.getBodyData(), headerMap, multiFileMap);
                     }
                     break;
                 case MethodType.PUT:
                     // 区分请求类型
-                    resp = OkHttp3Util.sendByPutJson2(OkHttp3Util.getEncodeRequestUrl(httpRequestEntity), httpRequestEntity.getBodyData(), headerMap);
+                    resp = OkHttp3Util.sendByPutJson(OkHttp3Util.getEncodeRequestUrl(httpRequestEntity), httpRequestEntity.getBodyData(), headerMap);
                     break;
                 case MethodType.DELETE:
                     // 区分请求类型
-                    resp = OkHttp3Util.sendByDeleteJson2(OkHttp3Util.getEncodeRequestUrl(httpRequestEntity), httpRequestEntity.getBodyData(), headerMap);
+                    resp = OkHttp3Util.sendByDeleteJson(OkHttp3Util.getEncodeRequestUrl(httpRequestEntity), httpRequestEntity.getBodyData(), headerMap);
                     break;
             }
         } catch (Exception e) {

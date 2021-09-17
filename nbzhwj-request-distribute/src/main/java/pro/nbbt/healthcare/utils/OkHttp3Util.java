@@ -13,11 +13,8 @@ import pro.nbbt.healthcare.entity.HttpRequestEntity;
 import pro.nbbt.healthcare.entity.HttpResponseEntity;
 import pro.nbbt.healthcare.entity.MultipartFileEntity;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -37,72 +34,8 @@ public class OkHttp3Util {
     private static final String WEB_SERVICE_RETURN_PREFIX = "<return>";
     private static final String WEB_SERVICE_RETURN_SUFFIX = "</return>";
 
-    /**
-     * @param url getUrl
-     * @return java.lang.String
-     * @author nirvana
-     * @date 2019/3/4 11:20
-     * @descprition
-     * @version 1.0
-     */
-    public static String sendByGetUrl(String url) {
-        String result;
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
-        Response response = null;
-        try {
-            response = client.newCall(request).execute();
-            assert response.body() != null;
-            result = response.body().string();
-            return result;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
-    /**
-     * @param url getUrl
-     * @return java.lang.String
-     * @author nirvana
-     * @date 2019/3/4 11:20
-     * @descprition
-     * @version 1.0
-     */
-    public static String sendByGetUrl(String url, Map<String, String> header) {
-        String result;
-        OkHttpClient client = new OkHttpClient();
-
-        Request.Builder builder = new Request.Builder().url(url);
-        if (!CollectionUtils.isEmpty(header)) {
-            header.forEach((k, val) -> {
-                builder.addHeader(k, val);
-            });
-        }
-        Request request = builder
-                .build();
-
-        Response response;
-        try {
-            response = client.newCall(request).execute();
-            assert response.body() != null;
-
-            Set<String> headerNames = response.headers().names();
-            headerNames.forEach(e -> {
-                log.info("响应头 : {} - {}", e, response.header(e));
-            });
-
-            result = response.body().string();
-            return result;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static HttpResponseEntity sendByGetUrl2(String url, Map<String, String> header) {
+    public static HttpResponseEntity sendByGetUrl(String url, Map<String, String> header) {
         HttpResponseEntity httpResponseEntity = new HttpResponseEntity();
         OkHttpClient client = new OkHttpClient();
 
@@ -138,73 +71,12 @@ public class OkHttp3Util {
     /**
      * @param url , json
      * @return java.lang.String
-     * @author nirvana
-     * @date 2019/3/4 11:13
-     * @descprition
-     * @version 1.0 post+json方式
-     */
-    public static String sendByPostJson(String url, String json) throws IOException {
-
-        //        OkHttpClient client = new OkHttpClient();
-        OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(30 , TimeUnit.SECONDS)
-                .writeTimeout(10 ,TimeUnit.SECONDS)
-                .readTimeout(10 ,TimeUnit.SECONDS)
-                .build();
-        RequestBody body = RequestBody.create(MEDIA_TYPE_JSON, json);
-        Request request = new Request.Builder()
-                .url(url)
-                .post(body)
-                .build();
-        Response response = null;
-
-        response = client.newCall(request).execute();
-        assert response.body() != null;
-        return response.body().string();
-    }
-
-    /**
-     * @param url , json
-     * @return java.lang.String
      * @author xiaobu
      * @date 2019/3/4 11:13
      * @descprition
      * @version 1.0 post+json方式
      */
-    public static String sendByPostJson(String url, String json, Map<String, String> header) throws IOException {
-
-        OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(30 , TimeUnit.SECONDS)
-                .writeTimeout(10 ,TimeUnit.SECONDS)
-                .readTimeout(10 ,TimeUnit.SECONDS)
-                .build();
-        RequestBody body = RequestBody.create(MEDIA_TYPE_JSON, json);
-
-        Request.Builder builder = new Request.Builder()
-                .url(url)
-                .post(body);
-
-        header.forEach((k, val) -> {
-            builder.addHeader(k, val);
-        });
-
-        Request request = builder.build();
-        Response response = null;
-
-        response = client.newCall(request).execute();
-        assert response.body() != null;
-        return response.body().string();
-    }
-
-    /**
-     * @param url , json
-     * @return java.lang.String
-     * @author xiaobu
-     * @date 2019/3/4 11:13
-     * @descprition
-     * @version 1.0 post+json方式
-     */
-    public static HttpResponseEntity sendByPostJson2(String url, String json, Map<String, String> header) throws IOException {
+    public static HttpResponseEntity sendByPostJson(String url, String json, Map<String, String> header) throws IOException {
 
         HttpResponseEntity httpResponseEntity = new HttpResponseEntity();
 
@@ -242,7 +114,7 @@ public class OkHttp3Util {
      * @descprition
      * @version 1.0 post+multipart/form-data方式
      */
-    public static HttpResponseEntity sendByPostMultipart2(String url, String json, Map<String, String> header, Map<String, MultipartFileEntity> multiFileMap) throws IOException {
+    public static HttpResponseEntity sendByPostMultipart(String url, String json, Map<String, String> header, Map<String, MultipartFileEntity> multiFileMap) throws IOException {
 
         HttpResponseEntity httpResponseEntity = new HttpResponseEntity();
 
@@ -258,12 +130,6 @@ public class OkHttp3Util {
         multiFileMap.forEach((k, v) -> {
             builder.addFormDataPart(k, v.getName(), RequestBody.create(MEDIA_TYPE_MULTIPART, v.getBytes()));
         });
-
-        /*Headers headers = Headers.of(header);
-        RequestBody body = RequestBody.create(MEDIA_TYPE_MULTIPART, json);
-        builder.addPart(headers, body);*/
-
-       /* RequestBody body = RequestBody.create(MEDIA_TYPE_MULTIPART, json);*/
 
         MultipartBody body = builder.build();
         Headers headers = Headers.of(header);
@@ -291,7 +157,7 @@ public class OkHttp3Util {
      * @descprition
      * @version 1.0 post+json方式
      */
-    public static HttpResponseEntity sendByPostXml2(String url, String xml, Map<String, String> header) throws IOException {
+    public static HttpResponseEntity sendByPostXml(String url, String xml, Map<String, String> header) throws IOException {
 
         HttpResponseEntity httpResponseEntity = HttpResponseEntity.newHttpResponseEntity();
 
@@ -323,41 +189,6 @@ public class OkHttp3Util {
         return httpResponseEntity;
     }
 
-    /**
-     * @author xiaobu
-     * @date 2019/3/4 15:58
-     * @param url , params]
-     * @return java.lang.String
-     * @descprition  post方式请求
-     * @version 1.0
-     */
-    public static String sendByPostMap(String url, Map<String, String> params) {
-        String result;
-        OkHttpClient client = new OkHttpClient();
-        StringBuilder content = new StringBuilder();
-        Set<Map.Entry<String, String>> entrys = params.entrySet();
-        Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, String> entry = iterator.next();
-            content.append(entry.getKey()).append("=").append(entry.getValue());
-            if (iterator.hasNext()) {
-                content.append("&");
-            }
-        }
-
-        RequestBody requestBody = RequestBody.create(MEDIA_TYPE_TEXT, content.toString());
-        Request request = new Request.Builder().url(url).post(requestBody).build();
-        Response response = null;
-        try {
-            response = client.newCall(request).execute();
-            assert response.body() != null;
-            result = response.body().string();
-            return result;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     /**
      * @param url , json
@@ -367,7 +198,7 @@ public class OkHttp3Util {
      * @descprition
      * @version 1.0 post+json方式
      */
-    public static HttpResponseEntity sendByPutJson2(String url, String json, Map<String, String> header) throws IOException {
+    public static HttpResponseEntity sendByPutJson(String url, String json, Map<String, String> header) throws IOException {
 
         HttpResponseEntity httpResponseEntity = HttpResponseEntity.newHttpResponseEntity();
 
@@ -404,7 +235,7 @@ public class OkHttp3Util {
      * @descprition
      * @version 1.0 post+json方式
      */
-    public static HttpResponseEntity sendByDeleteJson2(String url, String json, Map<String, String> header) throws IOException {
+    public static HttpResponseEntity sendByDeleteJson(String url, String json, Map<String, String> header) throws IOException {
 
         HttpResponseEntity httpResponseEntity = HttpResponseEntity.newHttpResponseEntity();
 
@@ -431,58 +262,6 @@ public class OkHttp3Util {
 
         // 解析响应
         return assembleResponse(response, httpResponseEntity);
-    }
-
-    /**
-     * @param url getUrl
-     * @return java.lang.String
-     * @author nirvana
-     * @date 2019/3/4 11:20
-     * @descprition
-     * @version 1.0
-     */
-    public static void downloadByGetUrl(String url, Map<String, String> header, String path) {
-        InputStream is = null;
-        FileOutputStream fos = null;
-        OkHttpClient client = new OkHttpClient();
-        Request.Builder builder = new Request.Builder()
-                .url(url);
-
-        header.forEach((k, val) -> {
-            builder.addHeader(k, val);
-        });
-        Request request = builder.build();
-        Response response = null;
-        try {
-            response = client.newCall(request).execute();
-
-            assert response.body() != null;
-            is = response.body().byteStream();
-
-            File file = new File(path);
-            fos = new FileOutputStream(file);
-            byte[] bytes = new byte[1024];
-            int len = 0;
-            int sum = 0;
-            while ((len = is.read(bytes)) != -1) {
-                fos.write(bytes);
-                sum += len;
-            }
-            fos.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (is != null) {
-                    is.close();
-                }
-                if (fos != null) {
-                    fos.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     /**
@@ -572,57 +351,5 @@ public class OkHttp3Util {
     public static String getWebServiceUrl(HttpRequestEntity httpRequestEntity) {
         RemoteConfig remoteConfig = SpringContextHolder.getBean(RemoteConfig.class);
         return remoteConfig.getWebServiceRequestUrl() + httpRequestEntity.getRequestUri() + "?wsdl";
-    }
-
-    public static void main(String[] args) throws IOException {
-
-
-        /*OkHttpClient client = new OkHttpClient().newBuilder()
-                .build();
-//        MediaType mediaType = MediaType.parse("application/xml");
-        RequestBody body = RequestBody.create(MEDIA_TYPE_APPLICATION_XML, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://service.server.huntto.com/\">\r\n   <soapenv:Header/>\r\n   <soapenv:Body>\r\n      <ser:sendValues>\r\n         <!--Optional:-->\r\n         <arg0>\r\n\r\n         \t<![CDATA[\r\n         <models>\r\n\t\t    <TestDataModel>\r\n\t\t        <TestID>197899</TestID>\r\n\t\t        <SiteID>fd7a0e51-e8ad-438d-84e6-f053009d6761</SiteID>\r\n\t\t        <ParameterID>12</ParameterID>\r\n\t\t        <TestValue>72.3000</TestValue>\r\n\t\t        <CreateDate>2021/08/31 21:37:06</CreateDate>\r\n\t\t        <CreateUser>BG_12080388872</CreateUser>\r\n\t\t        <LastChangeDate></LastChangeDate>\r\n\t\t        <LastChangeUser></LastChangeUser>\r\n\t\t        <State>1</State>\r\n\t\t        <TriggerValue></TriggerValue>\r\n\t\t        <Ext2></Ext2>\r\n\t\t        <Ext3></Ext3>\r\n\t\t</TestDataModel>\r\n\t\t<TestDataModel>\r\n\t\t        <TestID>197899</TestID>\r\n\t\t        <SiteID>fd7a0e51-e8ad-438d-84e6-f053009d6761</SiteID>\r\n\t\t        <ParameterID>13</ParameterID>\r\n\t\t        <TestValue>72.3000</TestValue>\r\n\t\t        <CreateDate>2021/08/31 21:37:06</CreateDate>\r\n\t\t        <CreateUser>BG_12080388872</CreateUser>\r\n\t\t        <LastChangeDate></LastChangeDate>\r\n\t\t        <LastChangeUser></LastChangeUser>\r\n\t\t        <State>1</State>\r\n\t\t        <TriggerValue></TriggerValue>\r\n\t\t        <Ext2></Ext2>\r\n\t\t        <Ext3></Ext3>\r\n\t\t</TestDataModel>\r\n\t\t<TestDataModel>\r\n\t\t        <TestID>197899</TestID>\r\n\t\t        <SiteID>fd7a0e51-e8ad-438d-84e6-f053009d6761</SiteID>\r\n\t\t        <ParameterID>14</ParameterID>\r\n\t\t        <TestValue>72.3000</TestValue>\r\n\t\t        <CreateDate>2021/08/31 21:37:06</CreateDate>\r\n\t\t        <CreateUser>BG_12080388872</CreateUser>\r\n\t\t        <LastChangeDate></LastChangeDate>\r\n\t\t        <LastChangeUser></LastChangeUser>\r\n\t\t        <State>1</State>\r\n\t\t        <TriggerValue></TriggerValue>\r\n\t\t        <Ext2></Ext2>\r\n\t\t        <Ext3></Ext3>\r\n\t\t</TestDataModel>\r\n\t\t</models>\r\n         \t]]>\r\n         </arg0>\r\n      </ser:sendValues>\r\n   </soapenv:Body>\r\n</soapenv:Envelope>");
-        Request request = new Request.Builder()
-                .url("http://192.168.0.197:9990/wj/waterserver?wsdl")
-                .method(MethodType.POST, body)
-//                .addHeader("Authorization", "Basic d2F0ZXJfbW9uaXRvcjp3YXRlcl9tb25pdG9y")
-                .addHeader("Content-Type", "application/xml")
-                .build();
-        Response response = client.newCall(request).execute();
-        System.out.println(response.body().string());*/
-
-       /* String s = "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"><soap:Body><ns2:sendValuesResponse xmlns:ns2=\"http://service.server.huntto.com/\"><return>0</return></ns2:sendValuesResponse></soap:Body></soap:Envelope>";
-
-
-        String s1 = s.substring(s.indexOf("<return>") + 8, s.indexOf("</return>"));
-        System.out.println(s1);*/
-
-        // --->
-        /*HttpResponseEntity httpResponseEntity = HttpResponseEntity.newHttpResponseEntity();
-
-        OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(30 , TimeUnit.SECONDS)
-                .writeTimeout(10 ,TimeUnit.SECONDS)
-                .readTimeout(10 ,TimeUnit.SECONDS)
-                .build();
-        RequestBody body = RequestBody.create(MEDIA_TYPE_APPLICATION_XML, xml);
-
-        Request.Builder builder = new Request.Builder()
-                .url(url)
-                .method(MethodType.POST, body);
-
-        header.forEach((k, val) -> {
-            builder.addHeader(k, val);
-        });
-
-        Request request = builder.build();
-        Response response;
-
-        response = client.newCall(request).execute();
-        assert response.body() != null;
-
-
-        // 解析响应
-        return assembleResponse(response, httpResponseEntity);*/
-
     }
 }

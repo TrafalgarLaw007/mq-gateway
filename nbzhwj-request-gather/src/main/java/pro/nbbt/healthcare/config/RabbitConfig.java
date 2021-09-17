@@ -11,26 +11,6 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitConfig {
 
     @Bean
-    public Queue queue() {
-        return new Queue("hello");
-    }
-
-    @Bean
-    public Queue RPCQueue() {
-        return new Queue("RPCQueue", true, false, false);
-    }
-
-    @Bean
-    public DirectExchange RPCExchange() {
-        return new DirectExchange("RPCExchange", true, false);
-    }
-
-    @Bean
-    public Binding bindingRPC() {
-        return BindingBuilder.bind(RPCQueue()).to(RPCExchange()).with("RPC");
-    }
-
-    @Bean
     public Queue requestQueue() {
         return new Queue("RequestQueue", true, false, false);
     }
