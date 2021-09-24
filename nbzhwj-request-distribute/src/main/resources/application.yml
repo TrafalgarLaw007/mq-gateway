@@ -2,15 +2,20 @@ server:
   port: 9200
 spring:
   rabbitmq:
-#    host: 192.168.0.148
-    host: 192.168.0.41
-    port: 5672
-    username: guest
-    password: guest
+#    host: 192.168.0.41
+#    host: rabbit-service
+#    port: 5672
+#    username: guest
+#    password: guest
+    host: ${MQ-HOST:rabbit-service}
+    port: ${MQ-PORT:5672}
+    username: ${MQ-USERNAME:guest}
+    password: ${MQ-PASSWORD:guest}
+    virtual-host: ${MQ-VHOST:/}
 remote:
-  host: ${REMOTE-HOST:192.168.0.197}
+  host: ${REMOTE-HOST:healthcare-gateway}
   port: ${REMOTE-PORT:9996}
-  webServiceHost: ${WS-HOST:192.168.0.197}
+  webServiceHost: ${WS-HOST:healthcare-gateway}
   webServicePort: ${WS-PORT:9990}
 data:
   logdebug: true

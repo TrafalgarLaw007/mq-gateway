@@ -18,7 +18,10 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
 
 @Data
@@ -136,11 +139,20 @@ public class HttpRequestEntity implements Serializable {
      * @param httpRequestEntity
      */
     private static void assembleParameterMap(HttpServletRequest request, HttpRequestEntity httpRequestEntity) {
-        httpRequestEntity.setParameterMap(request.getParameterMap());
-
-        httpRequestEntity.getParameterMap().forEach((k, v) -> {
-            log.info("请求参数 : {} - {}", k, v);
+        Map<String, String[]> parameterMap = new HashMap<>();
+        request.getParameterMap().forEach((k, v) -> {
+            try {
+                String[] newValues = new String[v.length];
+                for (int i = 0; i < v.length; i++) {
+                        newValues[i] = URLEncoder.encode(v[i], "UTF-8");
+                }
+                parameterMap.put(k, newValues);
+                log.info("请求参数 : {} - {} -> {}", k, v, newValues);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
         });
+        httpRequestEntity.setParameterMap(parameterMap);
     }
 
     /**

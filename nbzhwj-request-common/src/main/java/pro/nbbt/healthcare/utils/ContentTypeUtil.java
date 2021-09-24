@@ -81,6 +81,7 @@ public final class ContentTypeUtil {
         if (headerMap == null || headerMap.size() == 0) {
             return false;
         }
-        return headerMap.get(CONTENT_TYPE).contains(APPLICATION_XML) && headerMap.containsKey(CUSTOM_HEADER_WEB_SERVICE);
+        return Optional.ofNullable(headerMap.get(CONTENT_TYPE)).orElse(headerMap.get(CONTENT_TYPE.toLowerCase())).contains(APPLICATION_XML)
+                && headerMap.containsKey(CUSTOM_HEADER_WEB_SERVICE);
     }
 }

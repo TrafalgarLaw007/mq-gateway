@@ -35,7 +35,9 @@ public class ApiController {
             outputStream.write(resp.getBytes());
             outputStream.flush();
         }
-        response.setHeader(CONTENT_TYPE, resp.getHeaderMap().get(CONTENT_TYPE));
+        if (resp.getHeaderMap() != null) {
+            response.setHeader(CONTENT_TYPE, resp.getHeaderMap().get(CONTENT_TYPE));
+        }
         log.info("响应内容 : {}", resp.getResponse());
         return resp.getResponse();
     }
