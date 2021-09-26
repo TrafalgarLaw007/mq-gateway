@@ -144,10 +144,10 @@ public class HttpRequestEntity implements Serializable {
             try {
                 String[] newValues = new String[v.length];
                 for (int i = 0; i < v.length; i++) {
-                        newValues[i] = URLEncoder.encode(v[i], "UTF-8");
+                    newValues[i] = URLEncoder.encode(v[i], "UTF-8");
                 }
                 parameterMap.put(k, newValues);
-                log.info("请求参数 : {} - {} -> {}", k, v, newValues);
+                // log.info("请求参数 : {} - {} -> {}", k, v, newValues);
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }

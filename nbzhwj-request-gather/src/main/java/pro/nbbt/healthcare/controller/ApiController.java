@@ -2,6 +2,8 @@ package pro.nbbt.healthcare.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pro.nbbt.healthcare.entity.HttpRequestEntity;
@@ -15,7 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import static pro.nbbt.healthcare.utils.ContentTypeUtil.CONTENT_TYPE;
 
-@RestController
+//@RestController
+@Controller
 @Slf4j
 public class ApiController {
 
@@ -26,20 +29,25 @@ public class ApiController {
      * 所有请求同一入口
      */
     @RequestMapping(value = "/api/**", produces="application/json;charset=UTF-8")
-    public Object api(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public ResponseEntity<String> api(HttpServletRequest request, HttpServletResponse response) throws Exception {
         log.info("请求地址: {}", request.getRequestURL());
         HttpResponseEntity resp = (HttpResponseEntity) rabbitSender.send(HttpRequestEntity.builderJSON(request), request, response) ;
         // 写出文件
-        if (resp != null && ContentTypeUtil.isFileResponse(resp.getHeaderMap())) {
+        /*if (resp != null && ContentTypeUtil.isFileResponse(resp.getHeaderMap())) {
             ServletOutputStream outputStream = response.getOutputStream();
             outputStream.write(resp.getBytes());
             outputStream.flush();
         }
         if (resp.getHeaderMap() != null) {
             response.setHeader(CONTENT_TYPE, resp.getHeaderMap().get(CONTENT_TYPE));
-        }
-        log.info("响应内容 : {}", resp.getResponse());
-        return resp.getResponse();
+        }*/
+        log.info("相应状态码 : {}, 响应内容 : {}", resp.getStatusCode(), resp.getResponse());
+
+//        ResponseEntity responseEntity = new ResponseEntity();
+
+
+//        return resp.getResponse();
+        return resp.buildResponseEntity(response);
     }
 
     /*@RequestMapping(value = "/wj/**")

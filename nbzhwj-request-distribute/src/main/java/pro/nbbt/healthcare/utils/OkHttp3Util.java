@@ -277,6 +277,7 @@ public class OkHttp3Util {
         Map<String, String> headerMap = assembleHeaders(response);
         assembleBodyData(headerMap, response, httpResponseEntity);
         httpResponseEntity.setHeaderMap(headerMap);
+        httpResponseEntity.setStatusCode(response.code());
         return httpResponseEntity;
     }
 

@@ -47,7 +47,19 @@ public class BaseWebService {
                 .setRequestUri("/wj" + publishUrl.substring(publishUrl.lastIndexOf("/")))
                 .setHeaderMap(headerMap)
                 .setBodyData(String.format(WS_CONTENT_TEMPLATE, valuesXml));
-        HttpResponseEntity response = (HttpResponseEntity) rabbitSender.send(JSONObject.toJSONString(httpRequestEntity));
+
+        HttpResponseEntity response = null;
+        try {
+            response = (HttpResponseEntity) rabbitSender.send(JSONObject.toJSONString(httpRequestEntity));
+        } catch (Exception e) {
+            log.error("WebService请求异常", e);
+        }
+
+        if (response == null) {
+            response = new HttpResponseEntity();
+            response.setResponse("0");
+        }
+
         return response.getResponse();
     }
 

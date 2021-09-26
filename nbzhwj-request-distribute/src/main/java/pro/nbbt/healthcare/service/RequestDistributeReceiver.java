@@ -27,6 +27,8 @@ public class RequestDistributeReceiver {
 
     static final String COMMON_ERROR_RESPONSE = "{\"code\":\"1\", \"data\": null, \"msg\":\"服务器请求异常\"}";
 
+    static final String WEBSERVICE_COMMON_ERROR_RESPONSE = "0";
+
     static {
         APPLICATION_JSON_HEADER.put(ContentTypeUtil.CONTENT_TYPE, ContentTypeConstant.APPLICATION_JSON);
     }
@@ -42,6 +44,7 @@ public class RequestDistributeReceiver {
             log.info(" [x] -> Received {}", in);
         }
         HttpResponseEntity resp = new HttpResponseEntity();
+        boolean ws = false;
         try {
             Map<String, String> headerMap = httpRequestEntity.getHeaderMap();
             switch (httpRequestEntity.getMethod()) {
@@ -51,6 +54,7 @@ public class RequestDistributeReceiver {
                 case MethodType.POST:
                     // 区分请求类型
                     if (ContentTypeUtil.isWebService(httpRequestEntity.getHeaderMap())) {
+                        ws = true;
                         resp = OkHttp3Util.sendByPostXml(OkHttp3Util.getWebServiceUrl(httpRequestEntity), httpRequestEntity.getBodyData(), headerMap);
                     } else if (!ContentTypeUtil.isMultipartFormData(httpRequestEntity.getHeaderMap())) {
                         resp = OkHttp3Util.sendByPostJson(OkHttp3Util.getEncodeRequestUrl(httpRequestEntity), httpRequestEntity.getBodyData(), headerMap);
@@ -70,8 +74,12 @@ public class RequestDistributeReceiver {
             }
         } catch (Exception e) {
             log.error("请求异常 : {}", e);
-            resp.setResponse(COMMON_ERROR_RESPONSE)
-                    .setHeaderMap(APPLICATION_JSON_HEADER);
+            if (!ws) {
+                resp.setResponse(COMMON_ERROR_RESPONSE)
+                        .setHeaderMap(APPLICATION_JSON_HEADER);
+            } else {
+                resp.setResponse(WEBSERVICE_COMMON_ERROR_RESPONSE);
+            }
         }
 
         if (propertyConfig.getLogDebug()) {
