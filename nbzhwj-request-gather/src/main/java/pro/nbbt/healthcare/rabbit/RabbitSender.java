@@ -65,7 +65,6 @@ public class RabbitSender {
         CorrelationData correlationData = new CorrelationData(UUID.randomUUID().toString());
 
         // RPC调用
-//        rabbitTemplate.convertSendAndReceive("RequestExchange", "Req-Resp", message, correlationData);
         Object resp = rabbitTemplate.convertSendAndReceive("RequestExchange", "Req-Resp", message, correlationData);
         return resp;
     }

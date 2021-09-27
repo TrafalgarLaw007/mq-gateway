@@ -23,22 +23,10 @@ public class RequestGatherApplication implements ApplicationRunner {
     RabbitSender rabbitSender;
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(ApplicationArguments args) {
 
         // 发布数据接口服务
         WaterWebServiceImpl.publishWebService();
         ZYWSMoniterWebServiceImpl.publishWebService();
-
-        new Thread(() -> {
-            try {
-                while (1 == 1) {
-                    // rabbitSender.send("Hello RabbitMQ - " + LocalDateTime.now().toString(), Maps.newHashMap());
-                    // TimeUnit.SECONDS.sleep(10);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
-
     }
 }
