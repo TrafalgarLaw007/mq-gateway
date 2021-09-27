@@ -29,7 +29,7 @@ public class HttpResponseEntity implements Serializable {
     /**
      * 相应状态码
      */
-    public int statusCode;
+    public int statusCode = 200;
 
     public byte bytes[];
 
@@ -42,33 +42,17 @@ public class HttpResponseEntity implements Serializable {
     public ResponseEntity buildResponseEntity(HttpServletResponse response) throws IOException {
 
         int code = this.getStatusCode();
-        ResponseEntity responseEntity = null;
         if (ContentTypeUtil.isFileResponse(this.headerMap)) {
             ServletOutputStream outputStream = response.getOutputStream();
             outputStream.write(this.bytes);
             outputStream.flush();
-//            responseEntity = new ResponseEntity<> (HttpStatus.resolve(code));
-            ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.resolve(code));
-            responseEntity = builder.body(this.response);
+            return new ResponseEntity(this.response, HttpStatus.resolve(code));
         } else {
-//            MultiValueMap multiValueMap = new LinkedMultiValueMap<>();
             HttpHeaders httpHeaders = new HttpHeaders();
-            if (this.headerMap != null) {
-                this.headerMap.forEach((k, v) -> {
-                    httpHeaders.add(k, v);
-                });
+            if (this.headerMap != null && this.headerMap.containsKey(ContentTypeUtil.CONTENT_TYPE)) {
+                httpHeaders.add(ContentTypeUtil.CONTENT_TYPE, this.headerMap.get(ContentTypeUtil.CONTENT_TYPE));
             }
-//            responseEntity = new ResponseEntity<> (this.response, httpHeaders, HttpStatus.resolve(code));
-            ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.resolve(code));
-            builder.headers(httpHeaders);
-//            responseEntity = builder.body(this.response);
-
-            ServletOutputStream outputStream = response.getOutputStream();
-            outputStream.write(this.response.getBytes());
-            outputStream.flush();
-
-            responseEntity = builder.build();
+            return new ResponseEntity(this.response, httpHeaders, HttpStatus.resolve(code));
         }
-        return responseEntity;
     }
 }

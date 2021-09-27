@@ -34,7 +34,6 @@ public class OkHttp3Util {
     private static final String WEB_SERVICE_RETURN_PREFIX = "<return>";
     private static final String WEB_SERVICE_RETURN_SUFFIX = "</return>";
 
-
     public static HttpResponseEntity sendByGetUrl(String url, Map<String, String> header) {
         HttpResponseEntity httpResponseEntity = new HttpResponseEntity();
         OkHttpClient client = new OkHttpClient();
@@ -179,7 +178,6 @@ public class OkHttp3Util {
 
         response = client.newCall(request).execute();
         assert response.body() != null;
-
 
         // 解析响应
         assembleResponse(response, httpResponseEntity);
@@ -331,7 +329,6 @@ public class OkHttp3Util {
 
     @SneakyThrows
     public static String buildUrl(String url, Map<String, String[]> parameterMap) {
-
         if (CollectionUtils.isEmpty(parameterMap)) {
             return url;
         }

@@ -2,23 +2,23 @@ package pro.nbbt.healthcare.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pro.nbbt.healthcare.entity.HttpRequestEntity;
 import pro.nbbt.healthcare.entity.HttpResponseEntity;
 import pro.nbbt.healthcare.rabbit.RabbitSender;
-import pro.nbbt.healthcare.utils.ContentTypeUtil;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
 
-import static pro.nbbt.healthcare.utils.ContentTypeUtil.CONTENT_TYPE;
-
-//@RestController
-@Controller
+@RestController
+//@Controller
 @Slf4j
 public class ApiController {
 
@@ -29,49 +29,28 @@ public class ApiController {
      * 所有请求同一入口
      */
     @RequestMapping(value = "/api/**", produces="application/json;charset=UTF-8")
-    public ResponseEntity<String> api(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public ResponseEntity api(HttpServletRequest request, HttpServletResponse response) throws Exception {
         log.info("请求地址: {}", request.getRequestURL());
         HttpResponseEntity resp = (HttpResponseEntity) rabbitSender.send(HttpRequestEntity.builderJSON(request), request, response) ;
-        // 写出文件
-        /*if (resp != null && ContentTypeUtil.isFileResponse(resp.getHeaderMap())) {
-            ServletOutputStream outputStream = response.getOutputStream();
-            outputStream.write(resp.getBytes());
-            outputStream.flush();
-        }
-        if (resp.getHeaderMap() != null) {
-            response.setHeader(CONTENT_TYPE, resp.getHeaderMap().get(CONTENT_TYPE));
-        }*/
-        log.info("相应状态码 : {}, 响应内容 : {}", resp.getStatusCode(), resp.getResponse());
-
-//        ResponseEntity responseEntity = new ResponseEntity();
-
-
-//        return resp.getResponse();
-        return resp.buildResponseEntity(response);
+        ResponseEntity responseEntity = resp.buildResponseEntity(response);
+        log.info("响应状态码 : {}，实际响应码：{}，响应内容 : {}", resp.getStatusCode(), responseEntity.getStatusCodeValue(), resp.getResponse());
+        return responseEntity;
     }
 
-    /*@RequestMapping(value = "/wj/**")
-    public Object webservice(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        log.info("请求地址: {}", request.getRequestURL());
+    @RequestMapping(value= "/404")
+    public ResponseEntity unauth(HttpServletResponse response) throws IOException {
 
-        return request.getRequestURL();
-    }*/
+        ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.resolve(401));
 
-    /**
-     * 所有请求同一入口
-     */
-    /*@RequestMapping(value = "/wj/**", produces="application/json;charset=UTF-8")
-    public Object webservice(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        log.info("请求地址: {}", request.getRequestURL());
-        HttpResponseEntity resp = (HttpResponseEntity) rabbitSender.send(HttpRequestEntity.builderJSON(request), request, response) ;
-        // 写出文件
-        if (resp != null && ContentTypeUtil.isFileResponse(resp.getHeaderMap())) {
-            ServletOutputStream outputStream = response.getOutputStream();
-            outputStream.write(resp.getBytes());
-            outputStream.flush();
-        }
-        response.setHeader(CONTENT_TYPE, resp.getHeaderMap().get(CONTENT_TYPE));
-        log.info("响应内容 : {}", resp.getResponse());
-        return resp.getResponse();
-    }*/
+        /*ServletOutputStream outputStream = response.getOutputStream();
+        outputStream.write("no auth".getBytes());
+        outputStream.flush();
+
+        response.setStatus(401);*/
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Hello", "world");
+
+        return new ResponseEntity("no auth", httpHeaders, HttpStatus.resolve(401));
+    }
 }

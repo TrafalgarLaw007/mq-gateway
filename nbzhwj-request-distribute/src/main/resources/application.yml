@@ -18,4 +18,4 @@ remote:
   webServiceHost: ${WS-HOST:healthcare-gateway}
   webServicePort: ${WS-PORT:9990}
 data:
-  logdebug: true
+  logdebug: ${LOG-FLAG:false}

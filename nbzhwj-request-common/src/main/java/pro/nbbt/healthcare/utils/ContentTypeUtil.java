@@ -1,9 +1,7 @@
 package pro.nbbt.healthcare.utils;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import pro.nbbt.healthcare.constants.ContentTypeConstant;
 
 import java.util.List;
 import java.util.Map;
@@ -83,5 +81,13 @@ public final class ContentTypeUtil {
         }
         return Optional.ofNullable(headerMap.get(CONTENT_TYPE)).orElse(headerMap.get(CONTENT_TYPE.toLowerCase())).contains(APPLICATION_XML)
                 && headerMap.containsKey(CUSTOM_HEADER_WEB_SERVICE);
+    }
+
+    private static boolean containKey(Map<String, String> headerMap, String expireKey) {
+        return headerMap.containsKey(expireKey) && headerMap.containsKey(expireKey.toLowerCase());
+    }
+
+    private static boolean containKeyAndValue(Map<String, String> headerMap, String expireKey, String containValue) {
+        return Optional.ofNullable(headerMap.get(expireKey)).orElse(headerMap.get(expireKey.toLowerCase())).contains(containValue);
     }
 }
