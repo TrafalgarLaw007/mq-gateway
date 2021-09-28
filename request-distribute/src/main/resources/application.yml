@@ -1,0 +1,17 @@
+server:
+  port: 9200
+spring:
+  rabbitmq:
+    host: ${MQ-HOST:rabbit-service}
+    port: ${MQ-PORT:5672}
+    username: ${MQ-USERNAME:guest}
+    password: ${MQ-PASSWORD:guest}
+    virtual-host: ${MQ-VHOST:/}
+remote:
+  protocol: ${REMOTE-PROTOCOL:http}
+  host: ${REMOTE-HOST:remote-gateway}
+  port: ${REMOTE-PORT:9996}
+  webServiceHost: ${WS-HOST:remote-gateway}
+  webServicePort: ${WS-PORT:9990}
+data:
+  logdebug: ${LOG-FLAG:false}

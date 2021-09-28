@@ -1,0 +1,24 @@
+server:
+  port: 9090
+
+spring:
+  rabbitmq:
+    host: ${MQ-HOST:rabbit-service}
+    port: ${MQ-PORT:5672}
+    username: ${MQ-USERNAME:guest}
+    password: ${MQ-PASSWORD:guest}
+    virtual-host: ${MQ-VHOST:/}
+#    host: 100.50.3.198
+#    port: 30072
+#    username: xulian
+#    password: xulian2021
+#    virtual-host: xulian
+  servlet:
+    multipart:
+      max-file-size: 200
+
+web:
+  service:
+    url: http://%s:%s/wj/waterserver
+    publishIp: 0.0.0.0
+    publishPort: 8082
