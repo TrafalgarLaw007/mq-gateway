@@ -1,6 +1,7 @@
 package pro.nbbt.healthcare.utils;
 
 import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Optional;
 
 import static pro.nbbt.healthcare.constants.ContentTypeConstant.*;
 
+@Slf4j
 public final class ContentTypeUtil {
 
     public static final String CONTENT_TYPE = "Content-Type";
@@ -67,11 +69,15 @@ public final class ContentTypeUtil {
         if (headerMap == null || headerMap.size() == 0) {
             return false;
         }
-        return Optional.ofNullable(headerMap.get(CONTENT_TYPE)).orElse(headerMap.get(CONTENT_TYPE.toLowerCase())).contains(MULTIPART_FORM_DATA);
+        String contentType = Optional.ofNullable(headerMap.get(CONTENT_TYPE)).orElse(headerMap.get(CONTENT_TYPE.toLowerCase()));
+        if (StringUtils.isBlank(contentType)) {
+            return false;
+        }
+        return contentType.contains(MULTIPART_FORM_DATA);
     }
 
     /**
-     * 判断请求是否为文件
+     * 判断请求是否为WebService
      * @param headerMap
      * @return
      */
@@ -79,8 +85,16 @@ public final class ContentTypeUtil {
         if (headerMap == null || headerMap.size() == 0) {
             return false;
         }
-        return Optional.ofNullable(headerMap.get(CONTENT_TYPE)).orElse(headerMap.get(CONTENT_TYPE.toLowerCase())).contains(APPLICATION_XML)
-                && headerMap.containsKey(CUSTOM_HEADER_WEB_SERVICE);
+        log.info(headerMap.toString());
+        log.info("是否为WebService : {}", (headerMap.containsKey(CUSTOM_HEADER_WEB_SERVICE) || headerMap.containsKey(CUSTOM_HEADER_WEB_SERVICE.toLowerCase())));
+        /*String contentType = Optional.ofNullable(headerMap.get(CONTENT_TYPE)).orElse(headerMap.get(CONTENT_TYPE.toLowerCase()));
+        if (StringUtils.isBlank(contentType)) {
+            return false;
+        }
+        log.info(headerMap.toString());
+        return contentType.contains(APPLICATION_XML)
+                && headerMap.containsKey(CUSTOM_HEADER_WEB_SERVICE);*/
+        return headerMap.containsKey(CUSTOM_HEADER_WEB_SERVICE) || headerMap.containsKey(CUSTOM_HEADER_WEB_SERVICE.toLowerCase());
     }
 
     private static boolean containKey(Map<String, String> headerMap, String expireKey) {

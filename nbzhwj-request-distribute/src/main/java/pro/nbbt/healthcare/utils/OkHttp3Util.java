@@ -157,6 +157,7 @@ public class OkHttp3Util {
      * @version 1.0 post+json方式
      */
     public static HttpResponseEntity sendByPostXml(String url, String xml, Map<String, String> header) throws IOException {
+        log.info("sendByPostXml -> 请求地址: {}， 请求内容： {}", url, xml);
 
         HttpResponseEntity httpResponseEntity = HttpResponseEntity.newHttpResponseEntity();
 

@@ -1,7 +1,7 @@
 # mq-gateway
 
 ## 参考连接
-https://juejin.cn/post/6891457866155491335
+https://juejin.cn/post/6891457866155491335-RabbitMQ实现RPC调用
 
 ## rabbitMQ部署
 https://www.cnblogs.com/lihanlin/p/12657669.html
